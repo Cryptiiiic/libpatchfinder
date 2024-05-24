@@ -88,18 +88,20 @@ std::vector<patch> ibootpatchfinder64_iOS14::get_sigcheck_patch(){
         patches.push_back({img4interposercallbackret2 - 4, "\x00\x00\x80\xD2" /*mov x0, 0*/, 4});
     } else {
         patches.push_back({img4interposercallbackret - 4, "\x00\x00\x80\xD2" /*mov x0, 0*/, 4});
-        while(--iter3 != insn::b) continue;
-        if(--iter3 != insn::ldp) {
-            while(--iter3 != insn::b) continue;
-            if(--iter3 != insn::ldp) {
-                reterror("img4interposercallback couldn't find branch for ret2!");
-            } else {
-                while(--iter3 != insn::mov) continue;
-                loc_t img4interposercallbackmovx20 = iter3().pc();
-                debug("img4interposercallbackmovx20=%p", img4interposercallbackmovx20);
-                patches.push_back({img4interposercallbackmovx20, "\x00\x00\x80\xD2" /*mov x0, 0*/, 4});
-            }
+        int i = 0;
+        for(; i < 100; i++) {
+          while(--iter3 != insn::b) continue;
+          if(--iter3 == insn::ldp) {
+            break;
+          }
         }
+        if(i == 99) {
+            reterror("img4interposercallback couldn't find branch for ret2!");
+        }
+        while(--iter3 != insn::mov) continue;
+        loc_t img4interposercallbackmovx20 = iter3().pc();
+        debug("img4interposercallbackmovx20=%p", img4interposercallbackmovx20);
+        patches.push_back({img4interposercallbackmovx20, "\x00\x00\x80\xD2" /*mov x0, 0*/, 4});
     }
     return patches;
 }
