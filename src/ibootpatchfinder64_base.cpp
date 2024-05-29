@@ -706,11 +706,11 @@ std::vector<patch> ibootpatchfinder64_base::get_unlock_nvram_patch(){
 
     loc_t setenv_whitelist = debug_uarts_ref;
     
-    if(_chipid == 7001 || _chipid == 8000 || _chipid == 8003) {
-        debug("chipid == a8x/a9\n");
+    if(_chipid == 7000 || _chipid == 7001 || _chipid == 8000 || _chipid == 8003) {
+        debug("chipid == a8/a8x/a9\n");
         setenv_whitelist-=16;
     } else {
-        debug("chipid != a8x/a9\n");
+        debug("chipid != a8/a8x/a9\n");
         while (_vmem->deref(setenv_whitelist-=8));
         setenv_whitelist+=8;
     }
