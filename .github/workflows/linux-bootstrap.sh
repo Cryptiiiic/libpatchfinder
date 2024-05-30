@@ -2,9 +2,9 @@
 
 set -e
 export TMPDIR=/tmp
-export WORKFLOW_ROOT=${TMPDIR}/Builder/repos/liboffsetfinder64/.github/workflows
-export DEP_ROOT=${TMPDIR}/Builder/repos/liboffsetfinder64/dep_root
-export BASE=${TMPDIR}/Builder/repos/liboffsetfinder64/
+export WORKFLOW_ROOT=${TMPDIR}/Builder/repos/libpatchfinder/.github/workflows
+export DEP_ROOT=${TMPDIR}/Builder/repos/libpatchfinder/dep_root
+export BASE=${TMPDIR}/Builder/repos/libpatchfinder/
 
 #sed -i 's/deb\.debian\.org/ftp.de.debian.org/g' /etc/apt/sources.list
 apt-get -qq update

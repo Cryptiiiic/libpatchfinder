@@ -1,0 +1,12 @@
+prefix=/Users/cryptic/source/liboffsetfinder64/dep_root/
+exec_prefix=${prefix}/bin
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: libpatchfinder
+Description: a patchfinder for 32bit/64bit ARM
+
+Requires: libimg3tool libimg4tool libgeneral libinsn
+Version: 191
+Libs: -L${libdir} -lpatchfinder
+Cflags: -I${includedir}

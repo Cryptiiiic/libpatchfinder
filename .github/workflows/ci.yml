@@ -1,4 +1,4 @@
-name: liboffsetfinder64
+name: libpatchfinder
 
 on:
   push:
@@ -33,37 +33,37 @@ jobs:
     - name: macOS Build
       id: macOS-Build
       run: |
-        /Users/runner/work/liboffsetfinder64/liboffsetfinder64/.github/workflows/mac-bootstrap.sh
-        /Users/runner/work/liboffsetfinder64/liboffsetfinder64/.github/workflows/mac-build.sh
-        /Users/runner/work/liboffsetfinder64/liboffsetfinder64/.github/workflows/mac-post.sh
+        ${{ github.workspace }}/.github/workflows/mac-bootstrap.sh
+        ${{ github.workspace }}/.github/workflows/mac-build.sh
+        ${{ github.workspace }}/.github/workflows/mac-post.sh
     - name: macOS x86_64 RELEASE Archive
       id: macOS-x86_64-RELEASE-Archive
       uses: actions/upload-artifact@v2
       with:
-        name: liboffsetfinder64-macOS-x86_64-RELEASE
+        name: libpatchfinder-macOS-x86_64-RELEASE
         path: |
-          /Users/runner/work/liboffsetfinder64/liboffsetfinder64/liboffsetfinder64-macOS-x86_64-*-RELEASE.tar.xz
+          ${{ github.workspace }}/libpatchfinder-macOS-x86_64-*-RELEASE.tar.xz
     - name: macOS x86_64 DEBUG Archive
       id: macOS-x86_64-DEBUG-Archive
       uses: actions/upload-artifact@v2
       with:
-        name: liboffsetfinder64-macOS-x86_64-DEBUG
+        name: libpatchfinder-macOS-x86_64-DEBUG
         path: |
-          /Users/runner/work/liboffsetfinder64/liboffsetfinder64/liboffsetfinder64-macOS-x86_64-*-DEBUG.tar.xz
+          ${{ github.workspace }}/libpatchfinder-macOS-x86_64-*-DEBUG.tar.xz
     - name: macOS arm64 RELEASE Archive
       id: macOS-arm64-RELEASE-Archive
       uses: actions/upload-artifact@v2
       with:
-        name: liboffsetfinder64-macOS-arm64-RELEASE
+        name: libpatchfinder-macOS-arm64-RELEASE
         path: |
-          /Users/runner/work/liboffsetfinder64/liboffsetfinder64/liboffsetfinder64-macOS-arm64-*-RELEASE.tar.xz
+          ${{ github.workspace }}/libpatchfinder-macOS-arm64-*-RELEASE.tar.xz
     - name: macOS arm64 DEBUG Archive
       id: macOS-arm64-DEBUG-Archive
       uses: actions/upload-artifact@v2
       with:
-        name: liboffsetfinder64-macOS-arm64-DEBUG
+        name: libpatchfinder-macOS-arm64-DEBUG
         path: |
-          /Users/runner/work/liboffsetfinder64/liboffsetfinder64/liboffsetfinder64-macOS-arm64-*-DEBUG.tar.xz
+          ${{ github.workspace }}/libpatchfinder-macOS-arm64-*-DEBUG.tar.xz
   Linux:
     runs-on: ubuntu-latest
     steps:
@@ -79,32 +79,32 @@ jobs:
           image: debian:buster-slim
           options: -v ${{ github.workspace }}/..:/tmp/Builder/repos/
           run: |
-            /tmp/Builder/repos/liboffsetfinder64/.github/workflows/linux-bootstrap.sh
-            /tmp/Builder/repos/liboffsetfinder64/.github/workflows/linux-build.sh
-            /tmp/Builder/repos/liboffsetfinder64/.github/workflows/linux-post.sh
+            /tmp/Builder/repos/libpatchfinder/.github/workflows/linux-bootstrap.sh
+            /tmp/Builder/repos/libpatchfinder/.github/workflows/linux-build.sh
+            /tmp/Builder/repos/libpatchfinder/.github/workflows/linux-post.sh
       - name: Linux x86_64 RELEASE Build
         run: |
-          mkdir -p /home/runner/work/liboffsetfinder64/liboffsetfinder64/.github/workflows/
-          docker cp $(docker ps -ql):/tmp/Builder/repos/liboffsetfinder64/.github/workflows/name1.txt /home/runner/work/liboffsetfinder64/liboffsetfinder64/.github/workflows/
-          docker cp $(docker ps -ql):/tmp/Builder/repos/liboffsetfinder64/.github/workflows/liboffsetfinder641.tar.xz /home/runner/work/liboffsetfinder64/liboffsetfinder64/.github/workflows/
-          mv /home/runner/work/liboffsetfinder64/liboffsetfinder64/.github/workflows/liboffsetfinder641.tar.xz /home/runner/work/liboffsetfinder64/liboffsetfinder64/.github/workflows/$(cat /home/runner/work/liboffsetfinder64/liboffsetfinder64/.github/workflows/name1.txt)
+          mkdir -p /home/runner/work/libpatchfinder/libpatchfinder/.github/workflows/
+          docker cp $(docker ps -ql):/tmp/Builder/repos/libpatchfinder/.github/workflows/name1.txt /home/runner/work/libpatchfinder/libpatchfinder/.github/workflows/
+          docker cp $(docker ps -ql):/tmp/Builder/repos/libpatchfinder/.github/workflows/libpatchfinder1.tar.xz /home/runner/work/libpatchfinder/libpatchfinder/.github/workflows/
+          mv /home/runner/work/libpatchfinder/libpatchfinder/.github/workflows/libpatchfinder1.tar.xz /home/runner/work/libpatchfinder/libpatchfinder/.github/workflows/$(cat /home/runner/work/libpatchfinder/libpatchfinder/.github/workflows/name1.txt)
       - name: Linux x86_64 DEBUG Build
         run: |
-          mkdir -p /home/runner/work/liboffsetfinder64/liboffsetfinder64/.github/workflows/
-          docker cp $(docker ps -ql):/tmp/Builder/repos/liboffsetfinder64/.github/workflows/name2.txt /home/runner/work/liboffsetfinder64/liboffsetfinder64/.github/workflows/
-          docker cp $(docker ps -ql):/tmp/Builder/repos/liboffsetfinder64/.github/workflows/liboffsetfinder642.tar.xz /home/runner/work/liboffsetfinder64/liboffsetfinder64/.github/workflows/
-          mv /home/runner/work/liboffsetfinder64/liboffsetfinder64/.github/workflows/liboffsetfinder642.tar.xz /home/runner/work/liboffsetfinder64/liboffsetfinder64/.github/workflows/$(cat /home/runner/work/liboffsetfinder64/liboffsetfinder64/.github/workflows/name2.txt)
-      - name: liboffsetfinder64 Linux x86_64 RELEASE Archive
-        id: liboffsetfinder64-Linux-x86_64-RELEASE-Archive
+          mkdir -p /home/runner/work/libpatchfinder/libpatchfinder/.github/workflows/
+          docker cp $(docker ps -ql):/tmp/Builder/repos/libpatchfinder/.github/workflows/name2.txt /home/runner/work/libpatchfinder/libpatchfinder/.github/workflows/
+          docker cp $(docker ps -ql):/tmp/Builder/repos/libpatchfinder/.github/workflows/libpatchfinder2.tar.xz /home/runner/work/libpatchfinder/libpatchfinder/.github/workflows/
+          mv /home/runner/work/libpatchfinder/libpatchfinder/.github/workflows/libpatchfinder2.tar.xz /home/runner/work/libpatchfinder/libpatchfinder/.github/workflows/$(cat /home/runner/work/libpatchfinder/libpatchfinder/.github/workflows/name2.txt)
+      - name: libpatchfinder Linux x86_64 RELEASE Archive
+        id: libpatchfinder-Linux-x86_64-RELEASE-Archive
         uses: actions/upload-artifact@v2
         with:
-          name: liboffsetfinder64-Linux-x86_64-RELEASE
+          name: libpatchfinder-Linux-x86_64-RELEASE
           path: |
-            /home/runner/work/liboffsetfinder64/liboffsetfinder64/.github/workflows/liboffsetfinder64-Linux-x86_64*-RELEASE.tar.xz
-      - name: liboffsetfinder64 Linux x86_64 DEBUG Archive
-        id: liboffsetfinder64-Linux-x86_64-DEBUG-Archive
+            /home/runner/work/libpatchfinder/libpatchfinder/.github/workflows/libpatchfinder-Linux-x86_64*-RELEASE.tar.xz
+      - name: libpatchfinder Linux x86_64 DEBUG Archive
+        id: libpatchfinder-Linux-x86_64-DEBUG-Archive
         uses: actions/upload-artifact@v2
         with:
-          name: liboffsetfinder64-Linux-x86_64-DEBUG
+          name: libpatchfinder-Linux-x86_64-DEBUG
           path: |
-            /home/runner/work/liboffsetfinder64/liboffsetfinder64/.github/workflows/liboffsetfinder64-Linux-x86_64*-DEBUG.tar.xz
+            /home/runner/work/libpatchfinder/libpatchfinder/.github/workflows/libpatchfinder-Linux-x86_64*-DEBUG.tar.xz

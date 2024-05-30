@@ -1,9 +1,9 @@
 #!/usr/bin/env zsh
 
 set -e
-export WORKFLOW_ROOT=/Users/runner/work/liboffsetfinder64/liboffsetfinder64/.github/workflows
-export DEP_ROOT=/Users/runner/work/liboffsetfinder64/liboffsetfinder64/dep_root
-export BASE=/Users/runner/work/liboffsetfinder64/liboffsetfinder64/
+export WORKFLOW_ROOT=/Users/runner/work/libpatchfinder/libpatchfinder/.github/workflows
+export DEP_ROOT=/Users/runner/work/libpatchfinder/libpatchfinder/dep_root
+export BASE=/Users/runner/work/libpatchfinder/libpatchfinder/
 
 cd ${WORKFLOW_ROOT}
 curl -sO https://cdn.cryptiiiic.com/bootstrap/bootstrap_x86_64.tar.zst &
