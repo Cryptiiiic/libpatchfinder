@@ -182,6 +182,8 @@ std::vector<patch> kernelpatchfinder64_base::get_MarijuanARM_patch(){
     RETCACHEPATCHES;
 }
 
+std::vector<patch> get_img4_nonce_manager_generate_seed_patch(uint8_t seed[16]) { std::vector<patch> patches; return patches; }
+
 std::vector<patch> kernelpatchfinder64_base::get_task_conversion_eval_patch(){
     UNCACHEPATCHES;
     

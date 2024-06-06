@@ -301,6 +301,9 @@ std::vector<patch> kernelpatchfinder::get_MarijuanARM_patch(){
 std::vector<patch> kernelpatchfinder::get_task_conversion_eval_patch(){
     FAIL_UNIMPLEMENTED;
 }
+std::vector<patch> kernelpatchfinder::get_img4_nonce_manager_generate_seed_patch(uint8_t seed[16]){
+    FAIL_UNIMPLEMENTED;
+}
 
 std::vector<patch> kernelpatchfinder::get_vm_fault_internal_patch(){
     FAIL_UNIMPLEMENTED;

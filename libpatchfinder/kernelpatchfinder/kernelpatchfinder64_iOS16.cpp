@@ -1044,6 +1044,32 @@ patchfinder64::loc_t kernelpatchfinder64_iOS16::find_ppl_handler_table(){
     RETCACHELOC(retval);
 }
 
+patchfinder64::loc_t kernelpatchfinder64_iOS16::find_seed_is_zero_flags_str() {
+  UNCACHELOC;
+  loc_t seed_z_loc = findstr("seed is zero: flags", false);
+  debug("seed_z_loc=%p\n",seed_z_loc);
+  RETCACHELOC(seed_z_loc);
+}
+
+patchfinder64::loc_t kernelpatchfinder64_iOS16::find_img4_nonce_manager_generate_seed() {
+  UNCACHELOC;
+  loc_t seed_z_loc = this->find_seed_is_zero_flags_str();
+  if(!seed_z_loc) {
+    return 0;
+  }
+  loc_t seed_z_ref = find_literal_ref(seed_z_loc);
+  debug("seed_z_ref=%p\n",seed_z_ref);
+  if(!seed_z_ref) {
+    return 0;
+  }
+  loc_t img4_nmgs = find_bof(seed_z_ref);
+  debug("img4_nmgs=%p\n",img4_nmgs);
+  if(!img4_nmgs) {
+    return 0;
+  }
+  RETCACHELOC(img4_nmgs);
+}
+
 #pragma mark Patch finders
 std::vector<patch> kernelpatchfinder64_iOS16::get_trustcache_true_patch(){
     UNCACHEPATCHES;
@@ -1524,4 +1550,67 @@ std::vector<patch> kernelpatchfinder64_iOS16::get_task_conversion_eval_patch(){
 gotpatches:;
     retassure(patches.size(), "Failed to find a patch");
     RETCACHEPATCHES;
+}
+
+std::vector<patch> kernelpatchfinder64_iOS16::get_img4_nonce_manager_generate_seed_patch(uint8_t seed[16]) {
+    UNCACHEPATCHES;
+    loc_t seed_z_loc = this->find_seed_is_zero_flags_str();
+    if(seed_z_loc) {
+      uint64_t seed2[2] = {0};
+      if(!seed) {
+        seed2[0] = 0x1111111111111111;
+        seed2[1] = seed2[0];
+        patches.emplace_back(seed_z_loc, &seed2 /*seed*/, 16);
+      } else {
+        patches.emplace_back(seed_z_loc, seed /*seed*/, 16);
+      }
+      patches.emplace_back(seed_z_loc + 16, "\x00" /*seed*/, 1);
+      loc_t img4_nmgs = this->find_img4_nonce_manager_generate_seed();
+      if(img4_nmgs) {
+        vmem iter = _vmem->getIter(img4_nmgs);
+        while (++iter != insn::bl)
+          continue;
+        loc_t read_random_bl = iter().pc();
+        debug("read_random_bl=%p\n", iter().pc());
+        patches.emplace_back(read_random_bl, "\x1F\x20\x03\xD5" /*nop*/, 4);
+        try {
+          while (true) {
+            while (++iter != insn::stp)
+              continue;
+            if (iter().rt() == 0x1F && iter().rt() == 0x1F &&
+                ++iter == insn::add) {
+              break;
+            }
+          }
+        } catch (exception &e) {
+        }
+
+        loc_t add_loc = iter().pc();
+        uint64_t imm = 0;
+        uint64_t rn = 0;
+        try {
+          imm = iter().imm();
+          rn = iter().rn();
+        } catch (exception &e) {
+        }
+        if(imm && rn && rn == 31) {
+          debug("add_loc=%p\n", add_loc);
+          debug("add2_loc=%p\n", add_loc + 4);
+          auto adrp_loc = static_cast<int64_t>(seed_z_loc & (~0xfffULL));
+          debug("adrp_loc=%p\n", adrp_loc);
+          auto add_val = static_cast<uint64_t>(seed_z_loc - adrp_loc);
+          debug("add_val=%p\n", add_val);
+          pushINSN(insn::insn::new_general_adrp(
+              add_loc, adrp_loc, 0));
+          pushINSN(insn::insn::new_immediate_add(
+              add_loc + 4, add_val, 0, 0));
+          pushINSN(insn::insn::new_general_ldp_offset(add_loc + 8, 0, 1, 2, 0));
+          pushINSN(insn::insn::new_general_stp_offset(
+              add_loc + 12, imm, 1, 2, 31));
+          pushINSN(insn::insn::new_general_nop(add_loc + 16));
+        }
+      }
+    }
+  retassure(patches.size() > 1, "Failed to find a patch");
+  RETCACHEPATCHES;
 }

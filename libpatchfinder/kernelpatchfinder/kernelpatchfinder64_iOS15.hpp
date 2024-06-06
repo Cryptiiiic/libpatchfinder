@@ -40,7 +40,7 @@ namespace patchfinder {
         virtual std::vector<patch> get_tfp0_patch() override;
         
         virtual std::vector<patch> get_task_conversion_eval_patch() override;
-        
+
         virtual std::vector<patch> get_trustcache_true_patch() override;
         
         /*

@@ -66,6 +66,8 @@ namespace patchfinder {
         virtual loc_t find_pmap_remove_options() override;
         virtual loc_t find_ppl_bootstrap_dispatch() override;
         virtual loc_t find_ppl_handler_table() override;
+        virtual loc_t find_seed_is_zero_flags_str() override;
+        virtual loc_t find_img4_nonce_manager_generate_seed() override;
 
 #pragma mark Patch finders
         virtual std::vector<patch> get_trustcache_true_patch() override;
@@ -83,6 +85,7 @@ namespace patchfinder {
         virtual std::vector<patch> get_sandbox_patch() override;
         
         virtual std::vector<patch> get_task_conversion_eval_patch() override;
+        virtual std::vector<patch> get_img4_nonce_manager_generate_seed_patch(uint8_t seed[16] = nullptr) override;
     };
 }
 }

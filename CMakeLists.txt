@@ -6,6 +6,7 @@ set(CMAKE_CXX_FLAGS_DEBUG "-g -O0 -DDEBUG")
 set(CMAKE_C_STANDARD 17)
 set(CMAKE_CXX_STANDARD 20)
 set(ignoreMe "${NO_PKGCFG} ${ASAN} ${NO_XCODE}")
+option(NO_SHARED "Disable shared library building" OFF)
 project(patchfinder)
 if("${CMAKE_HOST_SYSTEM_NAME}" MATCHES "Darwin")
 	if(NOT DEFINED NO_XCODE AND NOT DEFINED ENV{NO_XCODE})
@@ -32,8 +33,16 @@ if("${CMAKE_HOST_SYSTEM_NAME}" MATCHES "Darwin")
 			set(CMAKE_OSX_DEPLOYMENT_TARGET 11.0)
 		endif()
 	endif()
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -arch ${ARCH} -isysroot ${SYSROOT} ${MINVER} -fembed-bitcode=off -flto=thin -pthread -mrelax-all -std=gnu++20")
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -arch ${ARCH} -isysroot ${SYSROOT} ${MINVER} -fembed-bitcode=off -flto=thin -pthread -mrelax-all -std=gnu17")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -arch ${ARCH} -isysroot ${SYSROOT} ${MINVER} -fembed-bitcode=off -pthread -mrelax-all -std=gnu++20")
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -arch ${ARCH} -isysroot ${SYSROOT} ${MINVER} -fembed-bitcode=off -pthread -mrelax-all -std=gnu17")
+	if(NOT "${CMAKE_BUILD_TYPE}" MATCHES "Debug" AND NOT "${CMAKE_BUILD_TYPE}" MATCHES "RelWithDebInfo")
+		message("")
+	else()
+		set(CMAKE_CXX_COMPILE_OPTIONS_IPO "-g -fno-lto")
+		set(CMAKE_C_COMPILE_OPTIONS_IPO "-g -fno-lto")
+		set(_CMAKE_LTO_THIN FALSE)
+		set(__lto_flags "-fno-lto")
+	endif()
 elseif("${CMAKE_HOST_SYSTEM_NAME}" MATCHES "Linux")
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wl,--allow-multiple-definition -pthread")
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wl,--allow-multiple-definition -pthread")
@@ -42,6 +51,7 @@ FILE(GLOB ibootpatchfinder32_sources src/ibootpatchfinder/ibootpatchfinder32_iOS
 FILE(GLOB ibootpatchfinder64_sources src/ibootpatchfinder/ibootpatchfinder64_iOS*.cpp)
 FILE(GLOB kernelpatchfinder32_sources src/kernelpatchfinder/kernelpatchfinder32_iOS*.cpp)
 FILE(GLOB kernelpatchfinder64_sources src/kernelpatchfinder/kernelpatchfinder64_iOS*.cpp)
+
 set(patchfinder_src
 		src/ibootpatchfinder/ibootpatchfinder.cpp
 		src/ibootpatchfinder/ibootpatchfinder32.cpp
@@ -64,19 +74,22 @@ set(patchfinder_src
 		src/patchfinder32.cpp
 		src/patchfinder64.cpp
 		src/StableHash.cpp)
+#		libpatchfinder/kernelpatchfinder/kernelpatchfinder64_iOS16.cpp)
 add_library(patchfinder STATIC ${patchfinder_src})
-add_library(patchfinder_shared SHARED ${patchfinder_src})
-set_target_properties(patchfinder_shared PROPERTIES OUTPUT_NAME "patchfinder.0")
 set(patchfinder_include
-        "${CMAKE_SOURCE_DIR}/dep_root/include"
+		"${CMAKE_SOURCE_DIR}/dep_root/include"
 		src
 		include/libpatchfinder
 		include)
-target_include_directories(patchfinder PRIVATE ${patchfinder_include})
-target_include_directories(patchfinder_shared PRIVATE ${patchfinder_include})
 set(patchfinder_link_dirs "${CMAKE_SOURCE_DIR}/dep_root/lib")
+if(NOT NO_SHARED)
+	add_library(patchfinder_shared SHARED ${patchfinder_src})
+	set_target_properties(patchfinder_shared PROPERTIES OUTPUT_NAME "patchfinder.0")
+	target_include_directories(patchfinder_shared PRIVATE ${patchfinder_include})
+	target_link_directories(patchfinder_shared PRIVATE ${patchfinder_link_dirs})
+endif()
+target_include_directories(patchfinder PRIVATE ${patchfinder_include})
 target_link_directories(patchfinder PRIVATE ${patchfinder_link_dirs})
-target_link_directories(patchfinder_shared PRIVATE ${patchfinder_link_dirs})
 if(NOT DEFINED NO_PKGCFG AND NOT "$ENV{NO_PKGCFG}" MATCHES "1")
     find_package(PkgConfig REQUIRED)
 	if("${CMAKE_HOST_SYSTEM_NAME}" MATCHES "Darwin")
@@ -92,9 +105,11 @@ if(NOT DEFINED NO_PKGCFG AND NOT "$ENV{NO_PKGCFG}" MATCHES "1")
 			img3tool
 			img4tool)
     target_include_directories(patchfinder PRIVATE "${DEPS_INCLUDE_DIRS}")
-    target_include_directories(patchfinder_shared PRIVATE "${DEPS_INCLUDE_DIRS}")
+	if(NOT NO_SHARED)
+		target_include_directories(patchfinder_shared PRIVATE "${DEPS_INCLUDE_DIRS}")
+		target_link_directories(patchfinder_shared PRIVATE "${DEPS_LIBRARY_DIRS}")
+	endif ()
 	target_link_directories(patchfinder PRIVATE "${DEPS_LIBRARY_DIRS}")
-	target_link_directories(patchfinder_shared PRIVATE "${DEPS_LIBRARY_DIRS}")
 endif()
 if("${CMAKE_HOST_SYSTEM_NAME}" MATCHES "Darwin")
 	set(patchfinder_libs compression)
@@ -110,7 +125,9 @@ set(patchfinder_libs
 		img3tool
 		img4tool)
 target_link_libraries(patchfinder PRIVATE ${patchfinder_libs})
-target_link_libraries(patchfinder_shared PRIVATE ${patchfinder_libs})
+if(NOT NO_SHARED)
+	target_link_libraries(patchfinder_shared PRIVATE ${patchfinder_libs})
+endif()
 
 if(NOT DEFINED VERSION_COMMIT_COUNT)
 	execute_process(COMMAND git rev-list --count HEAD WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}" OUTPUT_VARIABLE VERSION_COMMIT_COUNT ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
@@ -188,8 +205,10 @@ install(FILES
 		DESTINATION "${CMAKE_INSTALL_PREFIX}/lib")
 install(TARGETS patchfinder
         DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
-install(TARGETS patchfinder_shared
-        DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
+if(NOT NO_SHARED)
+	install(TARGETS patchfinder_shared
+			DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
+endif()
 
 #SET(CMAKE_EXPORT_COMPILE_COMMANDS 1)
 #get_cmake_property(_variableNames VARIABLES)

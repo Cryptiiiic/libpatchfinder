@@ -113,6 +113,8 @@ namespace tihmstar {
             virtual loc64_t find_pmap_remove_options();
             virtual loc64_t find_ppl_bootstrap_dispatch();
             virtual loc64_t find_ppl_handler_table();
+            virtual loc64_t find_seed_is_zero_flags_str() { return 0; };
+            virtual loc64_t find_img4_nonce_manager_generate_seed() { return 0; };
 
 
             virtual loc64_t find_IOGeneralMemoryDescriptor_ranges_offset();
@@ -123,6 +125,7 @@ namespace tihmstar {
 #pragma mark Patch finders
             virtual std::vector<patch> get_MarijuanARM_patch();
             virtual std::vector<patch> get_task_conversion_eval_patch();
+            virtual std::vector<patch> get_img4_nonce_manager_generate_seed_patch(uint8_t seed[16] = nullptr);
             virtual std::vector<patch> get_vm_fault_internal_patch();
 
             virtual std::vector<patch> get_trustcache_true_patch();
