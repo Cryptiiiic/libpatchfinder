@@ -558,6 +558,9 @@ std::vector<patch> ibootpatchfinder64_base::get_ra1nra1n_patch(){
 
 std::vector<patch> ibootpatchfinder64_base::get_unlock_nvram_patch(){
     std::vector<patch> patches;
+    if(!has_recovery_console()) {
+      return patches;
+    }
 
     loc_t debug_uarts_str = findstr("debug-uarts", true);
     debug("debug_uarts_str=0x%016llx\n",debug_uarts_str);
@@ -609,6 +612,9 @@ std::vector<patch> ibootpatchfinder64_base::get_unlock_nvram_patch(){
 
 std::vector<patch> ibootpatchfinder64_base::get_nvram_nosave_patch(){
     std::vector<patch> patches;
+    if(!has_recovery_console()) {
+      return patches;
+    }
 
     loc_t saveenv_str = findstr("saveenv", true);
     debug("saveenv_str=0x%016llx\n",saveenv_str);
@@ -632,6 +638,9 @@ std::vector<patch> ibootpatchfinder64_base::get_nvram_nosave_patch(){
 
 std::vector<patch> ibootpatchfinder64_base::get_nvram_noremove_patch(){
     std::vector<patch> patches;
+    if(!has_recovery_console()) {
+      return patches;
+    }
 
     auto nosave_patches = get_nvram_nosave_patch();
     loc_t nvram_save_func = nosave_patches.at(0)._location;
