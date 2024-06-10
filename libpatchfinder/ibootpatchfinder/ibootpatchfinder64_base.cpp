@@ -670,6 +670,9 @@ found:
 
 std::vector<patch> ibootpatchfinder64_base::get_freshnonce_patch(){
     std::vector<patch> patches;
+    if(!has_recovery_console()) {
+      return patches;
+    }
 
     loc_t noncevar_str = findstr("com.apple.System.boot-nonce", true);
     debug("noncevar_str=0x%016llx\n",noncevar_str);
@@ -695,7 +698,7 @@ std::vector<patch> ibootpatchfinder64_base::get_freshnonce_patch(){
     loc_t branchloc = iter;
     debug("branchloc=0x%016llx\n",branchloc);
 
-    patches.push_back({branchloc,"\x1F\x20\x03\xD5"/*nop*/,4});
+    patches.emplace_back(branchloc,"\x1F\x20\x03\xD5"/*nop*/,4);
     return patches;
 }
 
