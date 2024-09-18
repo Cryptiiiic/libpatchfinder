@@ -21,7 +21,7 @@ jobs:
     runs-on: macos-12
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
       with:
         submodules: 'true'
         fetch-depth: 0
@@ -38,28 +38,28 @@ jobs:
         ${{ github.workspace }}/.github/workflows/mac-post.sh
     - name: macOS x86_64 RELEASE Archive
       id: macOS-x86_64-RELEASE-Archive
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: libpatchfinder-macOS-x86_64-RELEASE
         path: |
           ${{ github.workspace }}/libpatchfinder-macOS-x86_64-*-RELEASE.tar.xz
     - name: macOS x86_64 DEBUG Archive
       id: macOS-x86_64-DEBUG-Archive
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: libpatchfinder-macOS-x86_64-DEBUG
         path: |
           ${{ github.workspace }}/libpatchfinder-macOS-x86_64-*-DEBUG.tar.xz
     - name: macOS arm64 RELEASE Archive
       id: macOS-arm64-RELEASE-Archive
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: libpatchfinder-macOS-arm64-RELEASE
         path: |
           ${{ github.workspace }}/libpatchfinder-macOS-arm64-*-RELEASE.tar.xz
     - name: macOS arm64 DEBUG Archive
       id: macOS-arm64-DEBUG-Archive
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: libpatchfinder-macOS-arm64-DEBUG
         path: |
@@ -68,13 +68,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           submodules: 'true'
           fetch-depth: 0
       - name: Linux Build
         id: Linux
-        uses: addnab/docker-run-action@v3
+        uses: addnab/docker-run-action@v4
         with:
           image: debian:buster-slim
           options: -v ${{ github.workspace }}/..:/tmp/Builder/repos/
@@ -96,14 +96,14 @@ jobs:
           mv /home/runner/work/libpatchfinder/libpatchfinder/.github/workflows/libpatchfinder2.tar.xz /home/runner/work/libpatchfinder/libpatchfinder/.github/workflows/$(cat /home/runner/work/libpatchfinder/libpatchfinder/.github/workflows/name2.txt)
       - name: libpatchfinder Linux x86_64 RELEASE Archive
         id: libpatchfinder-Linux-x86_64-RELEASE-Archive
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: libpatchfinder-Linux-x86_64-RELEASE
           path: |
             /home/runner/work/libpatchfinder/libpatchfinder/.github/workflows/libpatchfinder-Linux-x86_64*-RELEASE.tar.xz
       - name: libpatchfinder Linux x86_64 DEBUG Archive
         id: libpatchfinder-Linux-x86_64-DEBUG-Archive
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: libpatchfinder-Linux-x86_64-DEBUG
           path: |
