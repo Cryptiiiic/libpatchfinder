@@ -27,7 +27,7 @@ jobs:
         fetch-depth: 0
     - name: Update Xcode
       id: Update-Xcode
-      uses: maxim-lobanov/setup-xcode@v1
+      uses: maxim-lobanov/setup-xcode@v4
       with:
         xcode-version: '14.1.0'
     - name: macOS Build
