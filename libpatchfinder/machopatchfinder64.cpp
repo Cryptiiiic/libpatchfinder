@@ -90,7 +90,6 @@ std::vector<vsegment> machopatchfinder64::loadSegmentsForMachHeader(void *mh){
             bool isWeirdPrelinkText = (strcmp(seg->segname, "__PRELINK_TEXT") == 0 && seg->maxprot == (kVMPROTREAD | kVMPROTWRITE));
             if (strcmp(seg->segname, "__TEXT_EXEC") == 0) has_text_exec = true;
             segments.push_back({_buf+seg->fileoff,seg->filesize, seg->vmaddr, (vmprot)(isWeirdPrelinkText ? (kVMPROTEXEC | kVMPROTREAD) : seg->maxprot), seg->segname});
-            this->_fileoff_map[seg->vmaddr] = seg->fileoff;
         }
     }
     return segments;
@@ -120,7 +119,6 @@ void machopatchfinder64::loadSegments(){
             if (!_base){
                 _base = (patchfinder64::loc_t)seg->vmaddr; //first segment is base. Is this correct??
             }
-            this->_fileoff_map[seg->vmaddr] = seg->fileoff;
         }
         if (lcmd->cmd == LC_UNIXTHREAD) {
             uint32_t *ptr = (uint32_t *)(lcmd + 1);
@@ -189,7 +187,7 @@ void machopatchfinder64::init(){
     if (*(uint32_t*)_buf == 0xbebafeca || *(uint32_t*)_buf == 0xcafebabe) {
         bool swap = *(uint32_t*)_buf == 0xbebafeca;
     
-        std::pair<uint8_t *, uint32_t> tryfat = [=]() -> std::pair<uint8_t *, uint32_t> {
+        uint8_t* tryfat = [=]() -> uint8_t* {
             // just select first slice
             uint32_t* kdata32 = (uint32_t*) _buf;
             uint32_t narch = kdata32[1];
@@ -197,7 +195,7 @@ void machopatchfinder64::init(){
     
             if (narch != 1) {
                 printf("expected 1 arch in fat file, got %u\n", narch);
-                return std::make_pair(nullptr, 0);
+                return nullptr;
             }
     
             uint32_t offset = kdata32[2 + 2];
@@ -215,28 +213,26 @@ void machopatchfinder64::init(){
                 //a higher level instance will take care of properly freeing the buffer so we can avoid reallocation
                 assure(filesize <= _bufSize - offset);
                 _bufSize = filesize;
-                return std::make_pair((uint8_t*)_buf + offset, filesize);
+                return (uint8_t*)_buf + offset;
             }
             
             uint8_t *ret = (uint8_t*) malloc(filesize);
-            if (ret != NULL) {
+            if (ret != nullptr) {
                 assure(filesize <= _bufSize - offset);
                 _bufSize = filesize;
                 memcpy(ret, _buf + offset, filesize);
             }
-            return std::make_pair(ret, filesize);
+            return ret;
         }();
     
-        if (tryfat.first) {
-          printf("got fat macho with first slice at %u\n", (uint32_t) (tryfat.first - _buf));
-          if (_freeBuf) {
-            free((void*)_buf);
-          }
-          this->_fat = tryfat;
-          _buf = tryfat.first; tryfat.first = nullptr;
-          _bufSize = tryfat.second; tryfat.second = 0;
+        if (tryfat) {
+            printf("got fat macho with first slice at %u\n", (uint32_t) (tryfat - _buf));
+            if (_freeBuf) {
+              free((void*)_buf);
+            }
+            _buf = tryfat;tryfat = nullptr;
         } else {
-          printf("got fat macho but failed to parse\n");
+            printf("got fat macho but failed to parse\n");
         }
     }
     
@@ -314,8 +310,6 @@ patchfinder64(takeOwnership)
 machopatchfinder64::machopatchfinder64(machopatchfinder64 &&mv)
 : patchfinder64(std::move(mv)),
 __symtabs(mv.__symtabs),
-_fileoff_map(mv._fileoff_map),
-_fat(mv._fat)
 {
     _bufSize = mv._bufSize;
     _buf = mv._buf;
