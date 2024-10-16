@@ -15,8 +15,8 @@ AC_SUBST([VERSION_COMMIT_COUNT], ["m4_esyscmd([git rev-list --count HEAD | tr -d
 AC_SUBST([VERSION_COMMIT_SHA], ["m4_esyscmd([git rev-parse HEAD | tr -d '\n'])"])
 
 # Checks for programs.
-AC_PROG_CXX
-AC_PROG_CC
+AC_PROG_CXX([clang++])
+AC_PROG_CC([clang])
 
 # Check for operating system
 AC_MSG_CHECKING([whether we need platform-specific build settings])
@@ -33,15 +33,15 @@ case $host_os in
 esac
 
 
-CXXFLAGS+=" -std=c++11 -O3"
+CXXFLAGS+=" -std=c++20 -O3"
 CFLAGS+=" -std=c11"
 CXXFLAGS+=" -D EXPECTIONNAME=OFexception"
 
 # Checks for libraries.
-IMG4TOOL_REQUIRES_STR="libimg4tool >= 202"
-IMG3TOOL_REQUIRES_STR="libimg3tool >= 8"
-LIBGENERAL_REQUIRES_STR="libgeneral >= 75"
-LIBINSN_REQUIRES_STR="libinsn >= 49"
+IMG4TOOL_REQUIRES_STR="libimg4tool >= 198"
+IMG3TOOL_REQUIRES_STR="libimg3tool >= 2"
+LIBGENERAL_REQUIRES_STR="libgeneral >= 65"
+LIBINSN_REQUIRES_STR="libinsn >= 38"
 PKG_CHECK_MODULES(libimg4tool, $IMG4TOOL_REQUIRES_STR, have_img4tool=yes, have_img4tool=no)
 PKG_CHECK_MODULES(libimg3tool, $IMG3TOOL_REQUIRES_STR, have_img3tool=yes, have_img3tool=no)
 PKG_CHECK_MODULES(libgeneral, $LIBGENERAL_REQUIRES_STR)
@@ -158,6 +158,23 @@ fi
 AM_CONDITIONAL(WITH_WTFPWNDFU, test x$with_wtfpwndfu == xyes)
 
 # Checks for header files.
+
+ORIG_CFLAGS=${CFLAGS}
+CFLAGS+=" -I${lt_sysroot}/include -I${lt_sysroot}/${prefix}/include -I${lt_sysroot}/${ac_default_prefix}/include"
+AC_CHECK_HEADERS([mach-o/loader.h mach-o/nlist.h], [
+  AC_DEFINE(HAVE_MACHO_O_HEADER, 1, [Define if you have apple cctools headers])
+  AC_SUBST([HAVE_MACHO_O_HEADER], [1])
+  have_macho_header=yes;
+], [
+  AC_SUBST([HAVE_MACHO_O_HEADER], [0])
+  have_macho_header=no;
+], [])
+CFLAGS=${ORIG_CFLAGS}
+
+if test "x$have_macho_header" != "xyes"; then
+  AC_MSG_ERROR(["Macho-O headers not found, are apple cctools headers installed?"])
+fi
+
 AC_CHECK_HEADERS([fcntl.h stdint.h stdlib.h string.h unistd.h arpa/inet.h winsock.h])
 
 # Check for functions
@@ -173,7 +190,7 @@ AC_CONFIG_FILES([Makefile
                  tools/Makefile
                  tools/binrider/Makefile
                  tools/offsetexporter/Makefile
-		             libpatchfinder.pc])
+                 libpatchfinder.pc])
 AC_OUTPUT
 
 echo "
@@ -183,6 +200,7 @@ Configuration for $PACKAGE-$VERSION:
   install prefix ..........: $prefix
   have img4tool ...........: $with_img4tool
   have img3tool ...........: $with_img3tool
+  have mach-o header.......: $have_macho_header
   debug build  ............: $debug_build
   asan build  .............: $asan_build
   with binrider ...........: $with_binrider
