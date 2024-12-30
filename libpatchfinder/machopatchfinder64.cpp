@@ -314,7 +314,7 @@ patchfinder64(takeOwnership)
 
 machopatchfinder64::machopatchfinder64(machopatchfinder64 &&mv)
 : patchfinder64(std::move(mv)),
-__symtabs(mv.__symtabs),
+__symtabs(mv.__symtabs)
 {
     _bufSize = mv._bufSize;
     _buf = mv._buf;
